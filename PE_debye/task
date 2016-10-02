@@ -1,0 +1,6 @@
+#!/bin/sh
+#PBS -N PE_drug_400
+cd $PBS_O_WORKDIR
+lammps-daily -in in.binder
+##mpirun -np 4 lammps -in in.binder
+exit 0;

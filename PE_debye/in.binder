@@ -1,0 +1,97 @@
+
+	# VARIABLES
+	variable runtime        equal      500*10000
+	variable startstep      equal      0
+	variable stopstep       equal  v_runtime+v_startstep
+	variable dumpstep       equal       v_runtime/100
+	variable restartstep    equal       v_runtime/5
+
+	variable ljcut  		equal  2^(1/6)
+	variable tempur 		equal  1.0                          #0.001
+	variable drugcc         equal  ln(0.001)
+	variable drugmu        	equal  v_drugcc-7.8529305
+	variable fname   index configuration.txt
+	variable simname index bottlebrush
+
+	#######################################################
+	# Initialization
+
+	units		lj
+	boundary	p p p
+	atom_style	full
+	read_data	${fname}
+
+	#read_restart     restart.${startstep}
+
+	log 		log.${simname}.${stopstep}.txt
+########################################################
+# group
+	group chain  molecule  1
+	group drug   type      2
+
+	set type 1 charge  -3.0
+#	set type 2 charge   1.0
+
+	region insregion block  EDGE EDGE EDGE EDGE 45 50
+########################################################
+	# Dreiding potential information
+
+	bond_style      harmonic
+	bond_coeff	    * 128 ${ljcut}
+
+	angle_style     harmonic
+	angle_coeff	    1  0.0    180
+	angle_coeff	    2  0.0    180
+
+	pair_style hybrid/overlay lj/cut ${ljcut} coul/debye 0.1   10
+	pair_coeff 1 1 lj/cut 1.0 1.0
+	pair_coeff 1 2 lj/cut 1.0 1.0
+	pair_coeff 2 2 lj/cut 3.0 1.0  2.5
+	pair_coeff * * coul/debye
+
+	dielectric 1.0
+
+
+	special_bonds  lj 0.0 1.0 1.0
+
+	#####################################################
+
+
+	dump   1 all custom ${dumpstep} ${simname}.${stopstep}.lammpstrj id type x y z ix iy iz
+	restart  ${restartstep} restart.*
+
+	velocity  all create   0 1231
+	fix		1 all nve      #/limit 0.05
+	fix		2 all langevin ${tempur} ${tempur}  100.0 904297
+
+	fix 	3 drug gcmc 100 10 10 2 29494 ${tempur} ${drugmu} 0.01 region insregion charge 1.0  full_energy # mol gas
+	fix     4 chain  recenter 0.0 0.0 0.0
+
+	#####################################################
+	compute_modify thermo_temp dynamic yes 
+	thermo_style	custom step  temp pxx pyy pzz vol pe  # epair ebond eangle edihed  lx ly lz  dt
+	thermo          $(v_dumpstep)
+
+
+	variable time_step         	equal   step
+	variable po_total   		equal   pe
+	variable po_pair    		equal   epair
+	variable po_vdwl          	equal   evdwl
+	variable po_coul          	equal   ecoul
+	variable po_bond    		equal   ebond
+	variable po_angle   		equal   eangle
+	variable temp_inst         	equal   temp
+	variable num_atoms         	equal   atoms
+
+	thermo_modify norm no
+	fix output all print $(v_dumpstep/10) "${time_step} ${temp_inst} ${num_atoms} ${po_vdwl} ${po_coul} ${po_bond} ${po_angle}"  file potential.dat screen no
+
+	#####################################################
+
+	timestep	    0.01
+	run		        ${runtime}
+
+	unfix 1
+	unfix 2
+
+	print "All done"
