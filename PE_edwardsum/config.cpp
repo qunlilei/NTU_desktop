@@ -8,7 +8,7 @@ using namespace std;
 
 int main()
 {
-	int n_seg=100;
+	int n_seg=200;
 
 	int fold=100;
 
