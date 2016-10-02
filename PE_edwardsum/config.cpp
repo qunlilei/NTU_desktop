@@ -8,7 +8,7 @@ using namespace std;
 
 int main()
 {
-	int n_seg=200;
+	int n_seg=100;
 
 	int fold=100;
 
@@ -23,7 +23,7 @@ int main()
 	double box_ly=ny_row*chain_space_y;
 	int n_chain=nx_row*ny_row*nz_row;
 
-	int n_drug=n_chain*n_seg*0;
+	int n_drug=n_chain*n_seg*1;
 
 
 	double height=nz_row*fold;
