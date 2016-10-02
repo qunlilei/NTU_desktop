@@ -1,0 +1,17 @@
+#!/bin/sh
+#PBS -N PE3200
+#PBS -q normal
+#PBS -l select=1:ncpus=8:mpiprocs=8
+#PBS -l walltime=24:00:00
+#PBS -j oe
+
+inputfile=in.binder
+
+# load module environment
+module load lammps/16Feb16
+
+# change directory to the one where the job was submitted
+cd ${PBS_O_WORKDIR}
+
+# run the executable
+mpirun "$LAMMPS_EXECUTABLE" -in "$inputfile"
