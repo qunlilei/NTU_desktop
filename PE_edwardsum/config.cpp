@@ -24,7 +24,8 @@ int main()
 	int n_chain=nx_row*ny_row*nz_row;
 
 	int n_drug=n_chain*n_seg*1;
-
+	int n_cation=n_drug;
+	int n_anion=n_cation;
 
 	double height=nz_row*fold;
 
@@ -40,13 +41,13 @@ int main()
 
 	outfile<<setiosflags(ios::fixed)<<setprecision(4);
 	outfile<<endl;
-	outfile<<	n_seg*n_chain+n_drug                                                <<" atoms"   <<endl;
+	outfile<<	n_seg*n_chain+n_drug+n_cation+n_anion                                                <<" atoms"   <<endl;
 	outfile<<	(n_seg-1)*n_chain									                    <<" bonds"   <<endl;
 	outfile<<	(n_seg-2)*n_chain		                                                <<" angles"   <<endl;
 	outfile<<	0				     	                                                <<" dihedrals"<<endl;
 	outfile<<endl;
 
-	outfile<<	2	<<      " atom types"<<endl;
+	outfile<<	4	<<	        " atom types"<<endl;
 	outfile<<	1	<<		" bond types"<<endl;
 	outfile<<	2	<< 		" angle types"<<endl;
 	outfile<<	0	<< 		" dihedral types"<<endl;	
@@ -61,7 +62,8 @@ int main()
 	outfile<<endl;
 	outfile<<	1	<<" "<<    1.	<<endl;
 	outfile<<	2	<<" "<<	   1.	<<endl;
-
+	outfile<<	3	<<" "<<	   1.	<<endl;
+	outfile<<	4	<<" "<<	   1.	<<endl;
 
 //###################################################################################################
 	outfile<<endl;
@@ -102,6 +104,31 @@ int main()
 
 		//-----------------------------------------------------------------------------------------------------------------------
 			outfile<< n_chain*n_seg+i   <<" "<<  n_chain+1  <<" "<<  2  <<" "<<  1 <<" "<<  x_start      <<" "<<   y_start  <<" "<<    z_start <<endl;
+		//-----------------------------------------------------------------------------------------------------------------------
+	}
+
+	for(int i=1;i<=n_cation;i++)
+	{
+		double x_start=(i%nx_row+0.25)*chain_space_x-(i-1)/(fold*nx_row*ny_row)-box_lx/2;
+		double y_start=( (i-1)/nx_row+0.25)*chain_space_y-box_ly/2;
+		double z_start=(((i-1)/(nx_row*ny_row))%fold)-height/2;
+
+
+		//-----------------------------------------------------------------------------------------------------------------------
+			outfile<< n_chain*n_seg+n_drug+i   <<" "<<  n_chain+n_drug+1  <<" "<<  3  <<" "<<  1 <<" "<<  x_start      <<" "<<   y_start  <<" "<<    z_start <<endl;
+		//-----------------------------------------------------------------------------------------------------------------------
+	}
+
+
+	for(int i=1;i<=n_anion;i++)
+	{
+		double x_start=(i%nx_row+0.7)*chain_space_x-(i-1)/(fold*nx_row*ny_row)-box_lx/2;
+		double y_start=( (i-1)/nx_row+0.7)*chain_space_y-box_ly/2;
+		double z_start=(((i-1)/(nx_row*ny_row))%fold)-height/2;
+
+
+		//-----------------------------------------------------------------------------------------------------------------------
+			outfile<< n_chain*n_seg+n_drug+n_cation+i   <<" "<<  n_chain+n_drug+1  <<" "<<  4  <<" "<<  -1 <<" "<<  x_start      <<" "<<   y_start  <<" "<<    z_start <<endl;
 		//-----------------------------------------------------------------------------------------------------------------------
 	}
 

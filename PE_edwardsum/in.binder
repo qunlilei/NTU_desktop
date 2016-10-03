@@ -1,6 +1,6 @@
 
 	# VARIABLES
-	variable runtime        equal      100*10000
+	variable runtime        equal      1*10000
 	variable startstep      equal      0
 	variable stopstep       equal  v_runtime+v_startstep
 	variable dumpstep       equal       v_runtime/100
@@ -28,9 +28,13 @@
 # group
 	group chain  molecule  1
 	group drug   type      2
+	group cation type      3
+	group anion  type      4
 
 	set type 1 charge  -1.0
 	set type 2 charge   1.0
+	set type 3 charge   1.0
+	set type 4 charge  -1.0
 
 	region insregion block  EDGE EDGE EDGE EDGE 45 50
 ########################################################
@@ -44,9 +48,9 @@
 	angle_coeff	    2  0.0    180
 
 	pair_style hybrid/overlay lj/cut ${ljcut} coul/long  10.0
-	pair_coeff 1 1 lj/cut 4.0 1.0  2.5
-	pair_coeff 1 2 lj/cut 1.0 1.0
-	pair_coeff 2 2 lj/cut 1.0 1.0  # 2.5
+	pair_coeff * * lj/cut 1.0 1.0
+	pair_coeff 1 1 lj/cut 1.0 1.0  # 2.5
+	pair_coeff 2 2 lj/cut 3.0 1.0  2.5
 	pair_coeff * * coul/long
 
 	dielectric 1.0
