@@ -1,0 +1,116 @@
+########################################################
+# group
+	group chain  molecule  1
+200 atoms in group chain
+	group drug   type      2
+400 atoms in group drug
+	group cation type      3
+400 atoms in group cation
+	group anion  type      4
+400 atoms in group anion
+
+	set type 1 charge  -2.0
+  200 settings made for charge
+	set type 2 charge   1.0
+  400 settings made for charge
+	set type 3 charge   1.0
+  400 settings made for charge
+	set type 4 charge  -1.0
+  400 settings made for charge
+
+	region insregion block  EDGE EDGE EDGE EDGE 45 50
+########################################################
+	# Dreiding potential information
+
+	bond_style      harmonic
+	bond_coeff	    * 128 ${ljcut}
+	bond_coeff	    * 128 1.12246204830937
+
+	angle_style     harmonic
+	angle_coeff	    1  0.0    180
+	angle_coeff	    2  0.0    180
+
+	pair_style hybrid/overlay lj/cut ${ljcut} coul/long  10.0
+	pair_style hybrid/overlay lj/cut 1.12246204830937 coul/long  10.0
+	pair_coeff * * lj/cut 1.0 1.0
+	pair_coeff 1 1 lj/cut 1.0 1.0  # 2.5
+	pair_coeff 2 2 lj/cut 3.0 1.0  2.5
+	pair_coeff * * coul/long
+
+	dielectric 1.0
+
+	kspace_style pppm 1.0e-3
+
+	special_bonds  lj 0.0 1.0 1.0
+  2 = max # of 1-2 neighbors
+  2 = max # of 1-3 neighbors
+  4 = max # of 1-4 neighbors
+  6 = max # of special neighbors
+
+	#####################################################
+
+
+	dump   1 all custom ${dumpstep} ${simname}.${stopstep}.lammpstrj id type x y z ix iy iz
+	dump   1 all custom 10000 ${simname}.${stopstep}.lammpstrj id type x y z ix iy iz
+	dump   1 all custom 10000 bottlebrush.${stopstep}.lammpstrj id type x y z ix iy iz
+	dump   1 all custom 10000 bottlebrush.1000000.lammpstrj id type x y z ix iy iz
+	restart  ${restartstep} restart.*
+	restart  200000 restart.*
+
+	velocity  all create   0 1231
+	fix		1 all nve      #/limit 0.05
+	fix		2 all langevin ${tempur} ${tempur}  10.0 904297
+	fix		2 all langevin 1 ${tempur}  10.0 904297
+	fix		2 all langevin 1 1  10.0 904297
+
+#	fix 	3 drug gcmc 100 10 10 2 29494 ${tempur} ${drugmu} 0.01 region insregion charge 1.0  full_energy # mol gas
+	fix     4 chain  recenter 0.0 0.0 0.0
+
+	#####################################################
+	compute_modify thermo_temp dynamic yes
+	thermo_style	custom step  temp pxx pyy pzz vol pe  # epair ebond eangle edihed  lx ly lz  dt
+	thermo          $(v_dumpstep)
+	thermo          10000
+
+
+	variable time_step         	equal   step
+	variable po_total   		equal   pe
+	variable po_pair    		equal   epair
+	variable po_vdwl          	equal   evdwl
+	variable po_coul          	equal   ecoul
+	variable po_bond    		equal   ebond
+	variable po_angle   		equal   eangle
+	variable temp_inst         	equal   temp
+	variable num_atoms         	equal   atoms
+
+	thermo_modify norm no
+	fix output all print $(v_dumpstep/10) "${time_step} ${temp_inst} ${num_atoms} ${po_vdwl} ${po_coul} ${po_bond} ${po_angle}"  file potential.dat screen no
+	fix output all print 1000 "${time_step} ${temp_inst} ${num_atoms} ${po_vdwl} ${po_coul} ${po_bond} ${po_angle}"  file potential.dat screen no
+
+	#####################################################
+
+	timestep	    0.01
+	run		        ${runtime}
+	run		        1000000
+PPPM initialization ...
+WARNING: Using 12-bit tables for long-range coulomb (../kspace.cpp:319)
+  G vector (1/distance) = 0.193137
+  grid = 24 24 24
+  stencil order = 5
+  estimated absolute RMS force accuracy = 0.00114785
+  estimated relative force accuracy = 0.00114785
+  using double precision FFTs
+  3d grid and FFT values/proc = 8381 3456
+Neighbor list info ...
+  2 neighbor list requests
+  update every 1 steps, delay 10 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 10.3
+  ghost atom cutoff = 10.3
+  binsize = 5.15 -> bins = 20 20 20
+Memory usage per processor = 8.33432 Mbytes
+Step Temp Pxx Pyy Pzz Volume PotEng 
+       0            0  0.036932647 -0.0029521519  0.072990602      1000000    18977.183 
+   10000    1.0112017 0.00093928719 0.00059097438 0.00057832515      1000000   -1484.7548 
+   20000    1.0235037 0.0010810019 0.0011428708 0.00087990086      1000000   -2819.4221 
+   30000   0.987581
