@@ -1,6 +1,6 @@
 
 	# VARIABLES
-	variable runtime        equal      1*10000
+	variable runtime        equal      500*10000
 	variable startstep      equal      0
 	variable stopstep       equal  v_runtime+v_startstep
 	variable dumpstep       equal       v_runtime/100
