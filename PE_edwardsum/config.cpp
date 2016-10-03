@@ -23,7 +23,7 @@ int main()
 	double box_ly=ny_row*chain_space_y;
 	int n_chain=nx_row*ny_row*nz_row;
 
-	int n_drug=n_chain*n_seg*1;
+	int n_drug=n_chain*n_seg*2;
 	int n_cation=n_drug;
 	int n_anion=n_cation;
 
